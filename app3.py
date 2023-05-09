@@ -148,7 +148,8 @@ for index, row in df.iterrows():
     if common_time_slot >= fajr_start and common_time_slot + prayer_duration <= fajr_end:
         df.at[index, 'Fajr_start'] = common_time_slot
     else:
-        fajr_start = min(fajr_start, common_time_slot)
+        if fajr_start < common_time_slot:
+            fajr_start = common_time_slot
         df.at[index, 'Fajr_start'] = fajr_start
 
     df.at[index, 'Fajr_end'] = df.at[index, 'Fajr_start'] + prayer_duration
@@ -194,7 +195,7 @@ for item in formatted_df.columns:
                               .apply(lambda x: '{:02d}:{:02d}'.format(x[0], x[1]), axis=1))
 
 # Load your credentials from the JSON file
-credentials = service_account.Credentials.from_service_account_file('/Users/moien/Desktop/timetable/creds.json')
+credentials = service_account.Credentials.from_service_account_file('/Users/moien/Desktop/timetable_creator/creds.json')
 
 # Add the required scopes for Google Sheets and Drive
 scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
@@ -210,8 +211,6 @@ try:
     spreadsheet = gc.open(spreadsheet_title)
 except gspread.exceptions.SpreadsheetNotFound:
     spreadsheet = gc.create(spreadsheet_title)
-    spreadsheet.share('email_id', perm_type='user', role='writer')
-
 
 print(f"Google Sheet URL: {spreadsheet.url}")
 
